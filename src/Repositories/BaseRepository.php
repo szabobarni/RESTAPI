@@ -1,4 +1,7 @@
 <?php
+/**
+ * @author Németh Rajmond Ádám, Szabó József Barnabás
+ */
 
 namespace App\Repositories;
 
@@ -7,7 +10,7 @@ use App\Database\DB;
 class BaseRepository extends DB // implements DBInterface
 {
 
-    protected string $tableName;
+    protected $tableName;
 
     /**
      * @param array $data
@@ -47,6 +50,19 @@ class BaseRepository extends DB // implements DBInterface
         }
 
         return $result;
+    }
+    public function getAbcCity($county_id): array
+    {
+        $cities = $this->getAllCity($county_id);
+        $abc = [];
+        foreach ($cities as $city) {
+            $ch = strtoupper($city['city'][0]);
+            if (!in_array($ch, $abc)) {
+                $abc[] = $ch;
+            }
+        }
+
+        return $abc;
     }
 
     public function getByName(string $name): array
