@@ -51,19 +51,7 @@ class BaseRepository extends DB // implements DBInterface
 
         return $result;
     }
-    public function getAbcCity($county_id): array
-    {
-        $cities = $this->getAllCity($county_id);
-        $abc = [];
-        foreach ($cities as $city) {
-            $ch = strtoupper($city['city'][0]);
-            if (!in_array($ch, $abc)) {
-                $abc[] = $ch;
-            }
-        }
-
-        return $abc;
-    }
+    
 
     public function getByName(string $name): array
     {
@@ -79,13 +67,7 @@ class BaseRepository extends DB // implements DBInterface
         return $this->mysqli
             ->query($query)->fetch_all(MYSQLI_ASSOC);
     }
-    public function getAllCity($county_id): array
-    {
-        $query = $this->select() . "WHERE id_county = $county_id ORDER BY city";
-
-        return $this->mysqli
-            ->query($query)->fetch_all(MYSQLI_ASSOC);
-    }
+    
 
     public function update(int $id, array $data)
     {        
@@ -118,13 +100,6 @@ class BaseRepository extends DB // implements DBInterface
         return $this->mysqli->query($query)->fetch_all(MYSQLI_ASSOC);
     }
 
-//    public function truncate()
-//    {
-//        $query = "TRUNCATE TABLE makers;";
-//
-//        return $this->mysqli->query($query);
-//    }
-
     public function getCount()
     {
         $query = "SELECT COUNT(1) AS cnt FROM `{$this->tableName}`;";
@@ -138,4 +113,6 @@ class BaseRepository extends DB // implements DBInterface
     {
         return "SELECT * FROM `{$this->tableName}` ";
     }
+
+    
 }

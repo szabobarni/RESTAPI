@@ -45,7 +45,7 @@ class Request
                 break;
             case 'cities':
                 $data = self::getRequestData();
-                if (isset($data['name'])) {
+                if (isset($data['city'])) {
                     $repository = new CityRepository();
                     $newId = $repository->create($data);
                     $code = 201;
@@ -73,6 +73,40 @@ class Request
      *          "data":[
      *              {"id":2,"name":"B\u00e1cs-Kiskun"},
      *              {"id":3,"name":"Baranya"},
+     *              ...
+     *          ],
+     *          "message":"OK",
+     *          "status":200
+     *      }
+     * @apiError NotFound 
+     *
+     * @apiErrorExample Error-Response:
+     *     HTTP/1.1 404 Not Found
+     *     {
+     *          "data":[],
+     *          "message":"Not Found",
+     *          "status":404
+     *      }
+     */
+
+    /**
+     * @api {get} /counties/{id}/cities Get list of cities based on the county
+     * @apiName index
+     * @apiGroup Cities
+     * @apiVersion 1.0.0
+     *
+     * @apiSuccess {Object[]} cities        List of cities.
+     * @apiSuccess {Number}   cities.id     City id.
+     * @apiSuccess {String}   cities.city   City Name.
+     * @apiSuccess {Number}   cities.zip    City zipcode.
+     * @apiSuccess {Number}   county.id     County id where the city is located.
+     *
+     * @apiSuccessExample {json} Success-Response:
+     *      HTTP/1.1 200 OK
+     *      {
+     *          "data":[
+     *              {"id":2,"city":"B\u00e1cs-Kiskun"},
+     *              {"id":3,"city":"Baranya"},
      *              ...
      *          ],
      *          "message":"OK",
@@ -134,8 +168,42 @@ class Request
                     break;
                 }
 
-            $entities = $repository->getAllCity($county_id);
-            $abc = $repository->getAbcCity($county_id);             
+            $entities = $repository->getAllCity($county_id);         
+                if (empty($entities)) {
+                    $code = 404;
+                }
+                Response::response($entities, $code);
+                break;
+            case 'ABC':
+                $repository = new CityRepository();
+                $resourceId = self::getResourceId();
+                $county_id = self::getCountyId2();
+                $code = 200;
+                if ($resourceId) {
+                    $entity = $repository->find($resourceId);
+                    Response::response($entity, $code);
+                    break;
+                }
+
+                $entities = $repository->getAbcCity($county_id);
+                if (empty($entities)) {
+                    $code = 404;
+                }
+                Response::response($entities, $code);
+                break;
+            case 'ch':
+                $repository = new CityRepository();
+                $resourceId = self::getResourceId();
+                $county_id = self::getId();
+                $ch = self::getName();
+                $code = 200;
+                if ($resourceId) {
+                    $entity = $repository->find($resourceId);
+                    Response::response($entity, $code);
+                    break;
+                }
+
+                $entities = $repository->getCitiesByFirstCh($county_id,$ch);
                 if (empty($entities)) {
                     $code = 404;
                 }
@@ -316,12 +384,40 @@ class Request
 
         return $result;
     }
+    private static function getCountyId2()
+    {
+        $arrUri = self::getArrUri($_SERVER['REQUEST_URI']);
+        $result = 0;
+        if (is_numeric($arrUri[count($arrUri) - 3])) {
+            $result = $arrUri[count($arrUri) - 3];
+        }
+
+        return $result;
+    }
 
     private static function getFilterData(): array
     {
         $result = [];
         $arrUri = self::getArrUri($_SERVER['REQUEST_URI']);
 
+        return $result;
+    }
+
+    public static function getId()
+    {
+        $arrUri = self::getArrUri($_SERVER['REQUEST_URI']);
+        $result = 0;
+        if (is_numeric($arrUri[count($arrUri) - 4])) {
+            $result = $arrUri[count($arrUri) - 4];
+        }
+
+        return $result;
+    }
+
+    public static function getName()
+    {
+        $arrUri = self::getArrUri($_SERVER['REQUEST_URI']);
+        $result = $arrUri[count($arrUri)-2];
         return $result;
     }
 }
